@@ -23,7 +23,11 @@ pub fn run(mode: &str) {
 fn mark_time() {
     let data = get_records();
     let updated_file = mark(data);
-    set_records(&updated_file).expect("Error at writing the file again");
+    
+    match set_records(&updated_file) {
+        Ok(_) => print!("Registers updated."),
+        Err(err) => print!("There was an error to write the file: {}", err.to_string())
+    };
 }
 
 fn show_report() {
@@ -33,8 +37,16 @@ fn show_report() {
 
 fn get_records() -> JsonValue {
     let file_path = "records.json";
-    let contents = fs::read_to_string(file_path).expect("File not found!");
-    let data = json::parse(&contents).expect("The json is invalid!");
+    
+    let contents = match fs::read_to_string(file_path) {
+        Ok(value) => value,
+        Err(_) => "[]".to_string()
+    };
+
+    let data = match json::parse(&contents) {
+        Ok(value) => value,
+        Err(_) => JsonValue::Array(Vec::new())
+    };
 
     data
 }

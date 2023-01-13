@@ -2,16 +2,32 @@ use chrono::{DateTime, Utc};
 use dateparser::parse;
 use json::{self, JsonValue};
 
-use crate::utils::{format_time};
+use crate::utils::format_time;
 
 pub fn get_report(data: &JsonValue) {
-    println!("");
+    if data.len() == 0 {
+        println!("Sem registros para reportar, aponte algum horário.");
+        return;
+    }
+    
     for item in data.members() {
         let worked_seconds = get_worked_hours_from_day(
-            item["startTime"].as_str().expect("Not a string"),
-            item["lunchStartTime"].as_str().expect("Not a string"),
-            item["lunchEndTime"].as_str().expect("Not a string"),
-            item["endTime"].as_str().expect("Not a string"),
+            match item["startTime"].as_str() {
+                Some(value) => value,
+                None => ""
+            },
+            match item["lunchStartTime"].as_str() {
+                Some(value) => value,
+                None => ""
+            },
+            match item["lunchEndTime"].as_str() {
+                Some(value) => value,
+                None => ""
+            },
+            match item["endTime"].as_str() {
+                Some(value) => value,
+                None => ""
+            },
         );
 
         let total_minutes = worked_seconds / 60;

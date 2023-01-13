@@ -1,20 +1,19 @@
-use chrono::{DateTime, Datelike, Local};
 use owo_colors::OwoColorize;
 
-pub fn format_date(date: &DateTime<Local>) -> String {
+pub fn format_date(year: u32, month: u32, day: u32) -> String {
     let separator = "-".to_string();
-    let year = date.year().to_string();
+    let year = year.to_string();
 
-    let month = if date.month() < 10 {
-        "0".to_string() + &date.month().to_string()
+    let month = if month < 10 {
+        "0".to_string() + &month.to_string()
     } else {
-        date.month().to_string()
+        month.to_string()
     };
 
-    let day = if date.day() < 10 {
-        "0".to_string() + &date.day().to_string()
+    let day = if day < 10 {
+        "0".to_string() + &day.to_string()
     } else {
-        date.day().to_string()
+        day.to_string()
     };
 
     return year + &separator + &month + &separator + &day;

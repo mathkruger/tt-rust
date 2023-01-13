@@ -5,10 +5,23 @@ use json::{object, JsonValue};
 use crate::utils::{format_date, format_time};
 
 pub fn mark(mut data: JsonValue) -> String {
-    let last_register = data.members().last().unwrap();
+    let default_register = JsonValue::Array(Vec::new());
 
-    let last_date_on_file = parse(last_register["date"].as_str().unwrap()).unwrap();
+    let last_register = match data.members().last() {
+        Some(value) => value,
+        None => &default_register
+    };
+
     let current_time = Local::now();
+    let default_date_string = format_date(
+        current_time.year() as u32,
+        current_time.month(), 
+        current_time.day() - 1
+    );
+    let last_date_on_file = parse(match last_register["date"].as_str() {
+        Some(value) => value,
+        None => &default_date_string
+    }).unwrap();
 
     if last_date_on_file.day() != current_time.day()
         || last_date_on_file.month() != current_time.month()
@@ -23,12 +36,19 @@ pub fn mark(mut data: JsonValue) -> String {
 }
 
 fn handle_new_day(data: &JsonValue, current_time: &DateTime<Local>) -> JsonValue {
-    let formated_date = format_date(current_time);
+    let formated_date = format_date(
+        current_time.year() as u32,
+        current_time.month(),
+        current_time.day()
+    );
+
     let formated_time = format_time(
         current_time.hour(), 
         current_time.minute(),
         current_time.second()
     );
+
+    println!("Logando início do dia...");
 
     let new_day = object! {
         "date": formated_date,
