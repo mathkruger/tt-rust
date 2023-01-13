@@ -51,5 +51,5 @@ pub fn application_banner() {
    ██              ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██ 
    ██    ██        ██    ██   ██ ██   ██  ██████ ██   ██ ███████ ██   ██"#;
 
-    println!("{}", PROGRAM_HEADER.fg_rgb::<0x65, 0xB1, 0x22>().bold());
+    println!("{}\n", PROGRAM_HEADER.fg_rgb::<0x65, 0xB1, 0x22>().bold());
 }
