@@ -4,11 +4,15 @@ use json::JsonValue;
 
 use crate::report::*;
 use crate::register::*;
+use crate::utils::application_banner;
 
 mod report;
 mod register;
+mod utils;
 
 pub fn run(mode: &str) {
+    application_banner();
+    
     match mode {
         "report" => show_report(),
         "mark" => mark_time(),
