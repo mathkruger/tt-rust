@@ -1,5 +1,5 @@
+use std::env;
 use std::fs;
-
 use json::JsonValue;
 
 use crate::report::*;
@@ -35,8 +35,18 @@ fn show_report() {
     get_report(&data);
 }
 
+fn get_current_path() -> String {
+    return match env::current_exe() {
+        Err(_) => String::new(),
+        Ok(mut path) => {
+            path.pop();
+            return path.display().to_string()
+        }
+    };
+}
+
 fn get_records() -> JsonValue {
-    let file_path = "records.json";
+    let file_path = get_current_path() + "/records.json";
     
     let contents = match fs::read_to_string(file_path) {
         Ok(value) => value,
@@ -52,6 +62,6 @@ fn get_records() -> JsonValue {
 }
 
 fn set_records(value: &str) -> Result<(), std::io::Error> {
-    let file_path = "records.json";
+    let file_path = get_current_path() + "/records.json";
     return fs::write(file_path, value);
 }
