@@ -51,5 +51,14 @@ pub fn application_banner() {
    ██              ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██ 
    ██    ██        ██    ██   ██ ██   ██  ██████ ██   ██ ███████ ██   ██"#;
 
+    clear_screen();
     println!("{}\n", PROGRAM_HEADER.fg_rgb::<0x65, 0xB1, 0x22>().bold());
+}
+
+fn clear_screen() {
+    assert!(std::process::Command::new("cls")
+        .status()
+        .or_else(|_| std::process::Command::new("clear").status())
+        .unwrap()
+        .success());
 }

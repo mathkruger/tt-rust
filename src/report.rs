@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use dateparser::parse;
 use json::{self, JsonValue};
+use owo_colors::OwoColorize;
 
 use crate::utils::format_time;
 
@@ -10,6 +11,16 @@ pub fn get_report(data: &JsonValue) {
         return;
     }
     
+    println!(
+        "{0: <10} | {1: <10} | {2: <15} | {3: <15} | {4: <10} | {5: <15}",
+        "Data".bold(),
+        "Início".bold(),
+        "Início - almoço".bold(),
+        "Fim - almoço".bold(),
+        "Fim".bold(),
+        "Total de horas".bold()
+    );
+
     for item in data.members() {
         let worked_seconds = get_worked_hours_from_day(
             match item["startTime"].as_str() {
@@ -36,8 +47,8 @@ pub fn get_report(data: &JsonValue) {
         let hours = total_minutes / 60;
         let minutes = total_minutes % 60;
 
-        print!(
-            "{}: {} - {} - {} - {} = {} \n",
+        println!(
+            "{0: <10} | {1: <10} | {2: <15} | {3: <15} | {4: <10} | {5: <15}",
             item["date"],
             if item["startTime"].is_empty() {
                 "00:00:00"
@@ -62,6 +73,8 @@ pub fn get_report(data: &JsonValue) {
             format_time(hours as u32, minutes as u32, seconds as u32),
         );
     }
+
+    println!("");
 }
 
 pub fn get_worked_hours_from_day(

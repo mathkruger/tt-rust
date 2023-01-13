@@ -32,7 +32,7 @@ pub fn mark(mut data: JsonValue) -> String {
         data = handle_same_day(&data, &last_register, &current_time);
     }
 
-    return json::stringify(data);
+    return json::stringify_pretty(data, 2);
 }
 
 fn handle_new_day(data: &JsonValue, current_time: &DateTime<Local>) -> JsonValue {
