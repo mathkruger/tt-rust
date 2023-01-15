@@ -86,7 +86,7 @@ pub fn get_report(data: &JsonValue) {
         "{0: <72}---{1: <18} | {2: <10}",
         separator.repeat(72),
         "-------Saldo total",
-        total_hour_bank_formatted.style(style)
+        total_hour_bank_formatted.style(style).bold()
     );
 }
 
@@ -135,16 +135,16 @@ fn get_formatted_bank_time(raw_seconds: i64) -> (std::string::String, Style) {
     let hour_bank_type: &str = if raw_seconds < 0 {
         "-"
     } else {
-        " "
+        "+"
     };
 
     let hour_bank_formatted = hour_bank_type.to_owned() +
         &format_time(bank_hours as u32, bank_minutes as u32, bank_seconds as u32);
 
     let hour_bank_color = if hour_bank_type == "-" {
-        Style::new().red().bold()
+        Style::new().red()
     } else {
-        Style::new().green().bold()
+        Style::new().green()
     };
 
     (hour_bank_formatted, hour_bank_color)
