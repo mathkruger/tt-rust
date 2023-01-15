@@ -43,6 +43,22 @@ pub fn format_time(hour: u32, minutes: u32, seconds: u32) -> String {
     return hour + &separator + &minutes + &separator + &seconds;
 }
 
+fn format(mut items: Vec<u32>, separator: String) -> String {
+    let mut strings: Vec<String> = Vec::new();
+    
+    for el in items {
+        let parsed = if el < 10 {
+            "0".to_string() + &el.to_string()
+        } else {
+            el.to_string()
+        };
+        
+        strings.push(parsed);
+    }
+    
+    return strings.join(separator).to_string()
+}
+
 pub fn application_banner() {
     pub const PROGRAM_HEADER: &str = r#"
 ████████        ████████ ██████   █████   ██████ ██   ██ ███████ ██████  
