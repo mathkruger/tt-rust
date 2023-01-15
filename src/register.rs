@@ -45,7 +45,7 @@ fn handle_new_day(data: &JsonValue, current_time: &DateTime<Local>) -> JsonValue
     let formated_time = format_time(
         current_time.hour(), 
         current_time.minute(),
-        current_time.second()
+        0
     );
 
     println!("Logando início do dia...");
@@ -72,7 +72,7 @@ fn handle_same_day(
     let formated_time = format_time(
         current_time.hour(), 
         current_time.minute(),
-        current_time.second()
+        0
     );
 
     let mut save = true;

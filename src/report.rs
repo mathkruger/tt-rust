@@ -122,11 +122,10 @@ fn seconds_to_hour(raw_seconds: i64) -> (i64, i64, i64) {
     }
 
     let total_minutes = raw_seconds / 60;
-    let seconds = raw_seconds % 60;
     let hours = total_minutes / 60;
     let minutes = total_minutes % 60;
 
-    (hours, minutes, seconds)
+    (hours, minutes, 0)
 }
 
 fn get_formatted_bank_time(raw_seconds: i64) -> (std::string::String, Style) {
