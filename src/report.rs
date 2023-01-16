@@ -84,8 +84,8 @@ pub fn get_report(data: &JsonValue) {
 
     println!(
         "{0: <72}---{1: <18} | {2: <10}",
-        separator.repeat(72),
-        "-------Saldo total",
+        separator.repeat(72).bold(),
+        "------ Saldo total".bold(),
         total_hour_bank_formatted.style(style).bold()
     );
 }
