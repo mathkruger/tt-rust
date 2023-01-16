@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use json::JsonValue;
+use utils::TimeRegister;
 
 use crate::report::*;
 use crate::register::*;
@@ -24,7 +25,7 @@ fn mark_time() {
     let data = get_records();
     let updated_file = mark(data);
     
-    match set_records(&updated_file) {
+    match set_records(updated_file) {
         Ok(_) => print!("Registers updated."),
         Err(err) => print!("There was an error to write the file: {}", err.to_string())
     };
@@ -32,7 +33,7 @@ fn mark_time() {
 
 fn show_report() {
     let data = get_records();
-    get_report(&data);
+    get_report(data);
 }
 
 fn get_current_path() -> String {
@@ -45,7 +46,7 @@ fn get_current_path() -> String {
     };
 }
 
-fn get_records() -> JsonValue {
+fn get_records() -> Vec<TimeRegister> {
     let file_path = get_current_path() + "/records.json";
     
     let contents = match fs::read_to_string(file_path) {
@@ -58,10 +59,11 @@ fn get_records() -> JsonValue {
         Err(_) => JsonValue::Array(Vec::new())
     };
 
-    data
+    TimeRegister::to_time_register(&data)
 }
 
-fn set_records(value: &str) -> Result<(), std::io::Error> {
+fn set_records(value: Vec<TimeRegister>) -> Result<(), std::io::Error> {
+    let file_string = json::stringify_pretty(TimeRegister::to_json_array(value), 2);
     let file_path = get_current_path() + "/records.json";
-    return fs::write(file_path, value);
+    return fs::write(file_path, file_string);
 }

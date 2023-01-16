@@ -1,11 +1,10 @@
 use chrono::{DateTime, Utc};
 use dateparser::parse;
-use json::{self, JsonValue};
 use owo_colors::{OwoColorize, Style};
 
-use crate::utils::format_time;
+use crate::utils::{format_time, TimeRegister};
 
-pub fn get_report(data: &JsonValue) {
+pub fn get_report(data: Vec<TimeRegister>) {
     if data.len() == 0 {
         println!("Sem registros para reportar, aponte algum horário.");
         return;
@@ -24,24 +23,12 @@ pub fn get_report(data: &JsonValue) {
 
     let mut total_hour_bank = 0;
 
-    for item in data.members() {
+    for item in data {
         let worked_seconds = get_worked_hours_from_day(
-            match item["startTime"].as_str() {
-                Some(value) => value,
-                None => ""
-            },
-            match item["lunchStartTime"].as_str() {
-                Some(value) => value,
-                None => ""
-            },
-            match item["lunchEndTime"].as_str() {
-                Some(value) => value,
-                None => ""
-            },
-            match item["endTime"].as_str() {
-                Some(value) => value,
-                None => ""
-            },
+            &item.start_time,
+            &item.lunch_start_time,
+            &item.lunch_end_time,
+            &item.end_time
         );
 
         let day_hour_bank = worked_seconds - 28800;
@@ -50,27 +37,11 @@ pub fn get_report(data: &JsonValue) {
 
         println!(
             "{0: <10} | {1: <10} | {2: <15} | {3: <15} | {4: <10} | {5: <18} | {6: <10}",
-            item["date"],
-            if item["startTime"].is_empty() {
-                "00:00:00"
-            } else {
-                item["startTime"].as_str().unwrap()
-            },
-            if item["lunchStartTime"].is_empty() {
-                "00:00:00"
-            } else {
-                item["lunchStartTime"].as_str().unwrap()
-            },
-            if item["lunchEndTime"].is_empty() {
-                "00:00:00"
-            } else {
-                item["lunchEndTime"].as_str().unwrap()
-            },
-            if item["endTime"].is_empty() {
-                "00:00:00"
-            } else {
-                item["endTime"].as_str().unwrap()
-            },
+            item.date,
+            item.start_time,
+            item.lunch_start_time,
+            item.lunch_end_time,
+            item.end_time,
             format_time(hours as u32, minutes as u32, seconds as u32),
             hour_bank_formatted.style(hour_bank_color),
         );
@@ -78,13 +49,11 @@ pub fn get_report(data: &JsonValue) {
         total_hour_bank += day_hour_bank;
     }
 
-    let separator = "-";
-
     let (total_hour_bank_formatted, style) = get_formatted_bank_time(total_hour_bank);
-
+    
     println!(
         "{0: <72}---{1: <18} | {2: <10}",
-        separator.repeat(72).bold(),
+        "-".repeat(72).bold(),
         "------ Saldo total".bold(),
         total_hour_bank_formatted.style(style).bold()
     );

@@ -1,41 +1,46 @@
 use chrono::{DateTime, Datelike, Local, Timelike};
 use dateparser::parse;
-use json::{object, JsonValue};
+use json::{object};
 
-use crate::utils::{format_date, format_time};
+use crate::utils::{format_date, format_time, TimeRegister};
 
-pub fn mark(mut data: JsonValue) -> String {
-    let default_register = JsonValue::Array(Vec::new());
+pub fn mark(mut data: Vec<TimeRegister>) -> Vec<TimeRegister> {
+    let current_time = Local::now();
 
-    let last_register = match data.members().last() {
-        Some(value) => value,
-        None => &default_register
+    let default_register: TimeRegister = TimeRegister::new(&object! {
+        "date": format_date(
+            current_time.year() as u32,
+            current_time.month(), 
+            current_time.day() - 1
+        )
+    });
+
+    let last_register = match data.last() {
+        Some(value) => TimeRegister {
+            date: value.date.clone(),
+            start_time: value.start_time.clone(),
+            lunch_start_time: value.lunch_start_time.clone(),
+            lunch_end_time: value.lunch_end_time.clone(),
+            end_time: value.end_time.clone()
+        },
+        None => default_register
     };
 
-    let current_time = Local::now();
-    let default_date_string = format_date(
-        current_time.year() as u32,
-        current_time.month(), 
-        current_time.day() - 1
-    );
-    let last_date_on_file = parse(match last_register["date"].as_str() {
-        Some(value) => value,
-        None => &default_date_string
-    }).unwrap();
+    let last_date_on_file = parse(&last_register.date).unwrap();
 
     if last_date_on_file.day() != current_time.day()
         || last_date_on_file.month() != current_time.month()
         || last_date_on_file.year() != current_time.year()
     {
-        data = handle_new_day(&data, &current_time);
+        data = handle_new_day(data, &current_time);
     } else {
-        data = handle_same_day(&data, &last_register, &current_time);
+        data = handle_same_day(data, last_register, &current_time);
     }
 
-    return json::stringify_pretty(data, 2);
+    data
 }
 
-fn handle_new_day(data: &JsonValue, current_time: &DateTime<Local>) -> JsonValue {
+fn handle_new_day(mut data: Vec<TimeRegister>, current_time: &DateTime<Local>) -> Vec<TimeRegister> {
     let formated_date = format_date(
         current_time.year() as u32,
         current_time.month(),
@@ -50,25 +55,23 @@ fn handle_new_day(data: &JsonValue, current_time: &DateTime<Local>) -> JsonValue
 
     println!("Logando início do dia...");
 
-    let new_day = object! {
+    let new_day = TimeRegister::new(&object!{
         "date": formated_date,
         "startTime": formated_time,
         "lunchStartTime": "",
         "lunchEndTime": "",
         "endTime": "",
-    };
+    });
 
-    let mut data_to_save = data.clone();
-    data_to_save.push(new_day).unwrap();
-
-    data_to_save
+    data.push(new_day);
+    data
 }
 
 fn handle_same_day(
-    data: &JsonValue,
-    last_register: &JsonValue,
+    mut data: Vec<TimeRegister>,
+    mut last_register: TimeRegister,
     current_time: &DateTime<Local>,
-) -> JsonValue {
+) -> Vec<TimeRegister> {
     let formated_time = format_time(
         current_time.hour(), 
         current_time.minute(),
@@ -76,19 +79,18 @@ fn handle_same_day(
     );
 
     let mut save = true;
-    let mut register_to_modify = last_register.clone();
 
-    if register_to_modify["lunchStartTime"].is_empty() {
+    if last_register.lunch_start_time == "-" {
         println!("Logando inicio da hora de almoço...");
-        register_to_modify["lunchStartTime"] = json::JsonValue::String(formated_time);
+        last_register.lunch_start_time = formated_time;
     }
-    else if register_to_modify["lunchEndTime"].is_empty() {
+    else if last_register.lunch_end_time == "-" {
         println!("Logando fim da hora de almoço...");
-        register_to_modify["lunchEndTime"] = json::JsonValue::String(formated_time);
+        last_register.lunch_end_time = formated_time;
     }
-    else if register_to_modify["endTime"].is_empty() {
+    else if last_register.end_time == "-" {
         println!("Lili cantou!!! Logando fim do expediente!");
-        register_to_modify["endTime"] = json::JsonValue::String(formated_time);
+        last_register.end_time = formated_time;
     }
     else {
         println!("Você já parou de trabalhar, amigo. Vai jogar alguma coisa!");
@@ -96,20 +98,11 @@ fn handle_same_day(
     }
     
     if save {
-        let mut index = 0;
-        let mut data_to_save = data.clone();
+        let index = data.len() - 1;
+        data[index as usize] = last_register;
 
-        for entry in data_to_save.members_mut() {
-            if entry["date"] == last_register["date"] {
-                break;
-            }
-    
-            index += 1;
-        };
-
-        data_to_save[index as usize] = register_to_modify;
-        data_to_save
+        data
     } else {
-        data.clone()
+        data
     }
 }
