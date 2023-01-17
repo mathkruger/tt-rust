@@ -11,27 +11,39 @@ mod report;
 mod register;
 mod utils;
 
-pub fn run(mode: &str) {
-    application_banner();
-    
+pub fn run(mode: &str) {    
     match mode {
         "report" => show_report(),
-        "mark" => mark_time(),
-        _ => println!("Command not found")
+        "mark" => mark_time(false),
+        "mark-and-report" => mark_time(true),
+
+        "r" => show_report(),
+        "m" => mark_time(false),
+        "mr" => mark_time(true),
+
+        _ => show_report()
     }
 }
 
-fn mark_time() {
+fn mark_time(show_report_after_save: bool) {
     let data = get_records();
     let updated_file = mark(data);
     
     match set_records(updated_file) {
-        Ok(_) => print!("Registers updated."),
-        Err(err) => print!("There was an error to write the file: {}", err.to_string())
+        Ok(_) => {
+            if show_report_after_save {
+                println!("Registers updated.");
+            } else {
+                show_report();
+            }
+        },
+        Err(err) => println!("There was an error to write the file: {}", err.to_string())
     };
 }
 
 fn show_report() {
+    application_banner();
+
     let data = get_records();
     get_report(data);
 }
@@ -65,5 +77,6 @@ fn get_records() -> Vec<TimeRegister> {
 fn set_records(value: Vec<TimeRegister>) -> Result<(), std::io::Error> {
     let file_string = json::stringify_pretty(TimeRegister::to_json_array(value), 2);
     let file_path = get_current_path() + "/records.json";
+    
     return fs::write(file_path, file_string);
 }
