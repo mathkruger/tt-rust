@@ -31,7 +31,7 @@ fn mark_time(show_report_after_save: bool) {
     
     match set_records(updated_file) {
         Ok(_) => {
-            if show_report_after_save {
+            if !show_report_after_save {
                 println!("Registers updated.");
             } else {
                 show_report();
